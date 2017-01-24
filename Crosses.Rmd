@@ -1,0 +1,419 @@
+---
+title: "Crosses"
+author: "amesclir"
+date: "03/10/2016"
+output: html_document
+---
+
+1. Open the data and load library mlme.
+
+```{r}
+
+mydata <- read.csv("mydata.csv")
+library(nlme)
+
+```
+
+2. Test individual correlations between germination rates and others
+
+```{r}
+
+GR <- asin(mydata[,9]/100) #germination rates transformed
+CD <- mydata[,6] #chromosome number differences
+a1 <- gls(GR ~ CD)
+summary(a1)
+a2 <- update(a1,corr=corARMA(p=1,q=1))
+summary(a2)
+a3 <- update(a1,corr=corAR1(value=0, form=~1))
+summary(a3)
+a4 <- update(a1,corr=corCompSymm(value=0,form=~1))
+summary(a4)
+
+library(qpcR)
+akaike.weights(c(summary(a1)$AIC, summary(a2)$AIC, summary(a4)$AIC, summary(a4)$AIC))
+
+AICc <- function (AIC, n, k)
+  {
+  return(AIC + ((2*n*(k+1))/(n-k-1)))
+  }
+
+AICc(summary(a1)$AIC, 33, 2)
+AICc(summary(a2)$AIC, 33, 4)
+AICc(summary(a3)$AIC, 33, 3)
+AICc(summary(a4)$AIC, 33, 3)
+
+akaike.weights(c(AICc(summary(a1)$AIC, 33, 2), AICc(summary(a2)$AIC, 33, 4), AICc(summary(a3)$AIC, 33, 3), AICc(summary(a4)$AIC, 33, 3)))
+
+
+GR2 <- asin(subset(mydata[,9], mydata[,7]!= "NA")/100) #germination rates transformed
+MINCRF1 <- subset(mydata[,7], mydata[,7]!= "NA") #minimum number of irregu. in F1
+b1 <- gls(GR2 ~ MINCRF1)
+summary(b1)
+b2 <- update(b1,corr=corARMA(p=1,q=1))
+summary(b2)
+b3 <- update(b1,corr=corAR1(value=0, form=~1))
+summary(b3)
+b4 <- update(b1,corr=corCompSymm(value=0,form=~1))
+summary(b4)
+
+summary(b1)$AIC
+summary(b2)$AIC
+summary(b3)$AIC
+summary(b4)$AIC
+
+akaike.weights(c(summary(b1)$AIC, summary(b2)$AIC, summary(b4)$AIC, summary(b4)$AIC))
+
+AICc(summary(b1)$AIC, 11, 3)
+AICc(summary(b2)$AIC, 11, 5)
+AICc(summary(b3)$AIC, 11, 4)
+AICc(summary(b4)$AIC, 11, 4)
+
+akaike.weights(c(AICc(summary(b1)$AIC, 11, 3), AICc(summary(b2)$AIC, 11, 5), AICc(summary(b3)$AIC, 11, 4), AICc(summary(b4)$AIC, 11, 4)))
+
+
+MAXCRF1 <- subset(mydata[,8], mydata[,7]!= "NA") #max number of irregularities
+c1 <- gls(GR2 ~ MAXCRF1)
+summary(c1)
+c2 <- update(c1,corr=corARMA(p=1,q=1))
+summary(c2)
+c3 <- update(c1,corr=corAR1(value=0, form=~1))
+summary(c3)
+c4 <- update(c1,corr=corCompSymm(value=0,form=~1))
+summary(c4)
+
+summary(c1)$AIC
+summary(c2)$AIC
+summary(c3)$AIC
+summary(c4)$AIC
+
+akaike.weights(c(summary(c1)$AIC, summary(c2)$AIC, summary(c4)$AIC, summary(c4)$AIC))
+
+AICc(summary(c1)$AIC, 11, 3)
+AICc(summary(c2)$AIC, 11, 5)
+AICc(summary(c3)$AIC, 11, 4)
+AICc(summary(c4)$AIC, 11, 4)
+
+akaike.weights(c(AICc(summary(c1)$AIC, 11, 3), AICc(summary(c2)$AIC, 11, 5), AICc(summary(c3)$AIC, 11, 4), AICc(summary(c4)$AIC, 11, 4)))
+
+GEOD <- mydata[,10] #geographic distances
+GEND <- mydata[,11] #genetic distances
+d1 <- gls(GR ~ CD + GEOD + GEND)
+summary(d1)
+d2 <- update(d1,corr=corARMA(p=1,q=1))
+summary(d2)
+d3 <- update(d1,corr=corAR1(value=0, form=~1))
+summary(d3)
+d4 <- update(d1,corr=corCompSymm(value=0,form=~1))
+summary(d4)
+
+summary(d1)$AIC
+summary(d2)$AIC
+summary(d3)$AIC
+summary(d4)$AIC
+
+akaike.weights(c(summary(d1)$AIC, summary(d2)$AIC, summary(d3)$AIC, summary(d4)$AIC))
+
+AICc(summary(d1)$AIC, 33, 5)
+AICc(summary(d2)$AIC, 33, 7)
+AICc(summary(d3)$AIC, 33, 6)
+AICc(summary(d4)$AIC, 33, 6)
+
+akaike.weights(c(AICc(summary(d1)$AIC, 33, 5), AICc(summary(d2)$AIC, 33, 7), AICc(summary(d3)$AIC, 33, 6), AICc(summary(d4)$AIC, 33, 6)))
+
+
+
+GEOD2 <- subset(mydata[,10], mydata[,7]!= "NA") #geographic distances
+GEND2 <- subset(mydata[,11], mydata[,7]!= "NA") #genetic distances
+e1 <- gls(GR2 ~ MINCRF1 + GEOD2 + GEND2)
+summary(e1)
+e2 <- update(e1,corr=corARMA(p=1,q=1))
+summary(e2)
+e3 <- update(e1,corr=corAR1(value=0, form=~1))
+summary(e3)
+e4 <- update(e1,corr=corCompSymm(value=0,form=~1))
+summary(e4)
+
+summary(e1)$AIC
+summary(e2)$AIC
+summary(e3)$AIC
+summary(e4)$AIC
+
+akaike.weights(c(summary(e1)$AIC, summary(e2)$AIC, summary(e4)$AIC, summary(e4)$AIC))
+
+AICc(summary(e1)$AIC, 11, 5)
+AICc(summary(e2)$AIC, 11, 7)
+AICc(summary(e3)$AIC, 11, 6)
+AICc(summary(e4)$AIC, 11, 6)
+
+akaike.weights(c(AICc(summary(e1)$AIC, 11, 5), AICc(summary(e2)$AIC, 11, 7), AICc(summary(e3)$AIC, 11, 6), AICc(summary(e4)$AIC, 11, 6)))
+
+
+f1 <- gls(GR ~ GEOD)
+summary(f1)
+f2 <- update(f1,corr=corARMA(p=1,q=1))
+summary(f2)
+f3 <- update(f1,corr=corAR1(value=0, form=~1))
+summary(f3)
+f4 <- update(f1,corr=corCompSymm(value=0,form=~1))
+summary(f4)
+
+summary(f1)$AIC
+summary(f2)$AIC
+summary(f3)$AIC
+summary(f4)$AIC
+
+akaike.weights(c(summary(f1)$AIC, summary(f2)$AIC, summary(f3)$AIC, summary(f4)$AIC))
+
+AICc(summary(f1)$AIC, 33, 3)
+AICc(summary(f2)$AIC, 33, 5)
+AICc(summary(f3)$AIC, 33, 4)
+AICc(summary(f4)$AIC, 33, 4)
+
+akaike.weights(c(AICc(summary(f1)$AIC, 33, 3), AICc(summary(f2)$AIC, 33, 5), AICc(summary(f3)$AIC, 33, 4), AICc(summary(f4)$AIC, 33, 4)))
+
+
+
+g1 <- gls(GR ~ GEND)
+summary(g1)
+g2 <- update(g1,corr=corARMA(p=1,q=1))
+summary(g2)
+g3 <- update(g1,corr=corAR1(value=0, form=~1))
+summary(g3)
+g4 <- update(g1,corr=corCompSymm(value=0,form=~1))
+summary(g4)
+
+summary(g1)$AIC
+summary(g2)$AIC
+summary(g3)$AIC
+summary(g4)$AIC
+
+akaike.weights(c(summary(g1)$AIC, summary(g2)$AIC, summary(g3)$AIC, summary(g4)$AIC))
+
+AICc(summary(g1)$AIC, 33, 3)
+AICc(summary(g2)$AIC, 33, 5)
+AICc(summary(g3)$AIC, 33, 4)
+AICc(summary(g4)$AIC, 33, 4)
+
+akaike.weights(c(AICc(summary(g1)$AIC, 33, 3), AICc(summary(g2)$AIC, 33, 5), AICc(summary(g3)$AIC, 33, 4), AICc(summary(g4)$AIC, 33, 4)))
+
+
+MOTHER <- mydata[,1]
+h1 <- gls(GR ~ MOTHER)
+summary(h1)
+h2 <- update(h1,corr=corARMA(p=1,q=1))
+summary(h2)
+h3 <- update(h1,corr=corAR1(value=0, form=~1))
+summary(h3)
+h4 <- update(h1,corr=corCompSymm(value=0,form=~1))
+summary(h4)
+
+summary(h1)$AIC
+summary(h2)$AIC
+summary(h3)$AIC
+summary(h4)$AIC
+
+akaike.weights(c(summary(h1)$AIC, summary(h2)$AIC, summary(h3)$AIC, summary(h4)$AIC))
+
+AICc(summary(h1)$AIC, 33, 17)
+AICc(summary(h2)$AIC, 33, 19)
+AICc(summary(h3)$AIC, 33, 18)
+AICc(summary(h4)$AIC, 33, 18)
+
+akaike.weights(c(AICc(summary(h1)$AIC, 33, 17), AICc(summary(h2)$AIC, 33, 19), AICc(summary(h3)$AIC, 33, 18), AICc(summary(h4)$AIC, 33, 18)))
+
+MOTHER2 <- subset(mydata[,1], mydata[,7] != "NA")
+i1 <- gls(GR2 ~ MOTHER2)
+summary(i1)
+i2 <- update(i1,corr=corARMA(p=1,q=1))
+summary(i2)
+i3 <- update(i1,corr=corAR1(value=0, form=~1))
+summary(i3)
+i4 <- update(i1,corr=corCompSymm(value=0,form=~1))
+summary(i4)
+
+summary(i1)$AIC
+summary(i2)$AIC
+summary(i3)$AIC
+summary(i4)$AIC
+
+akaike.weights(c(summary(i1)$AIC, summary(i2)$AIC, summary(i3)$AIC, summary(i4)$AIC))
+
+AICc(summary(i1)$AIC, 11, 7)
+AICc(summary(i2)$AIC, 11, 9)
+AICc(summary(i3)$AIC, 11, 8)
+AICc(summary(i4)$AIC, 11, 8)
+
+akaike.weights(c(AICc(summary(i1)$AIC, 11, 7), AICc(summary(i2)$AIC, 11, 9), AICc(summary(i3)$AIC, 11, 8), AICc(summary(i4)$AIC, 11, 8)))
+
+
+
+j1 <- gls(GR ~ CD + MOTHER)
+summary(j1)
+j2 <- update(j1,corr=corARMA(p=1,q=1))
+summary(j2)
+j3 <- update(j1,corr=corAR1(value=0, form=~1))
+summary(j3)
+j4 <- update(j1,corr=corCompSymm(value=0,form=~1))
+summary(j4)
+
+summary(j1)$AIC
+summary(j2)$AIC
+summary(j3)$AIC
+summary(j4)$AIC
+
+akaike.weights(c(summary(j1)$AIC, summary(j2)$AIC, summary(j3)$AIC, summary(j4)$AIC))
+
+AICc(summary(j1)$AIC, 33, 18)
+AICc(summary(j2)$AIC, 33, 20)
+AICc(summary(j3)$AIC, 33, 19)
+AICc(summary(j4)$AIC, 33, 19)
+
+akaike.weights(c(AICc(summary(j1)$AIC, 33, 18), AICc(summary(j2)$AIC, 33, 20), AICc(summary(j3)$AIC, 33, 19), AICc(summary(j4)$AIC, 33, 19)))
+
+k1 <- gls(GR2 ~ MINCRF1 + MOTHER2)
+summary(k1)
+k2 <- update(k1,corr=corARMA(p=1,q=1))
+summary(k2)
+k3 <- update(k1,corr=corAR1(value=0, form=~1))
+summary(k3)
+k4 <- update(k1,corr=corCompSymm(value=0,form=~1))
+summary(k4)
+
+summary(k1)$AIC
+summary(k2)$AIC
+summary(k3)$AIC
+summary(k4)$AIC
+
+akaike.weights(c(summary(k1)$AIC, summary(k2)$AIC, summary(k3)$AIC, summary(k4)$AIC))
+
+AICc(summary(i1)$AIC, 11, 8)
+AICc(summary(i2)$AIC, 11, 10)
+AICc(summary(i3)$AIC, 11, 9)
+AICc(summary(i4)$AIC, 11, 9)
+
+akaike.weights(c(AICc(summary(i1)$AIC, 11, 8), AICc(summary(i2)$AIC, 11, 10), AICc(summary(i3)$AIC, 11, 9), AICc(summary(i4)$AIC, 11, 9)))
+
+CD2 <- subset(mydata[,6], mydata[,7] != "NA") 
+l1 <- gls(MINCRF1 ~ CD2)
+summary(l1)
+l2 <- update(l1,corr=corARMA(p=1,q=1))
+summary(l2)
+l3 <- update(l1,corr=corAR1(value=0, form=~1))
+summary(l3)
+l4 <- update(l1,corr=corCompSymm(value=0,form=~1))
+summary(l4)
+
+summary(l1)$AIC
+summary(l2)$AIC
+summary(l3)$AIC
+summary(l4)$AIC
+
+akaike.weights(c(summary(l1)$AIC, summary(l2)$AIC, summary(l3)$AIC, summary(l4)$AIC))
+
+AICc(summary(l1)$AIC, 11, 4)
+AICc(summary(l2)$AIC, 11, 6)
+AICc(summary(l3)$AIC, 11, 5)
+AICc(summary(l4)$AIC, 11, 5)
+
+akaike.weights(c(AICc(summary(l1)$AIC, 11, 4), AICc(summary(l2)$AIC, 11, 6), AICc(summary(l3)$AIC, 11, 5), AICc(summary(l4)$AIC, 11, 5)))
+
+```
+
+3. Getting some R-squares
+
+```{r}
+
+
+gls.r.squared <- function(x) {
+ e = x$resid
+ V<-corMatrix(x$modelStruct$corStruct)
+ Y = x$resid + x$fitted
+ one <- matrix(1, length(Y), 1)
+ a <- as.numeric(solve(t(one) %*% solve(V) %*% one) %*% (t(one) %*%
+solve(V) %*% Y))
+ r.squared= 1-(t(e) %*% solve(V) %*% e) / (t(Y-a) %*% solve(V) %*%
+(Y-a))
+ return(r.squared[1,1])
+ }
+
+gls.r.squared(a3)
+gls.r.squared(d3)
+gls.r.squared(f3)
+
+
+
+```
+
+Additional analyses after the third revision
+
+
+```{r}
+
+o1 <- gls(CD ~ GEOD + GEND)
+summary(o1)
+o2 <- update(o1,corr=corARMA(p=1,q=1))
+summary(o2)
+o3 <- update(o1,corr=corAR1(value=0, form=~1))
+summary(o3)
+o4 <- update(o1,corr=corCompSymm(value=0,form=~1))
+summary(o4)
+
+summary(o1)$AIC
+summary(o2)$AIC
+summary(o3)$AIC
+summary(o4)$AIC
+
+akaike.weights(c(summary(o1)$AIC, summary(o2)$AIC, summary(o3)$AIC, summary(o4)$AIC))
+
+AICc(summary(o1)$AIC, 33, 4)
+AICc(summary(o2)$AIC, 33, 6)
+AICc(summary(o3)$AIC, 33, 5)
+AICc(summary(o4)$AIC, 33, 5)
+
+akaike.weights(c(AICc(summary(o1)$AIC, 33, 4), AICc(summary(o2)$AIC, 33, 6), AICc(summary(o3)$AIC, 33, 5), AICc(summary(o4)$AIC, 33, 5)))
+
+
+
+GEOD2 <- subset(mydata[,10], mydata[,7]!= "NA") #geographic distances
+GEND2 <- subset(mydata[,11], mydata[,7]!= "NA") #genetic distances
+p1 <- gls(MINCRF1 ~ GEOD2 + GEND2)
+summary(p1)
+p2 <- update(p1,corr=corARMA(p=1,q=1))
+summary(p2)
+p3 <- update(p1,corr=corAR1(value=0, form=~1))
+summary(p3)
+p4 <- update(p1,corr=corCompSymm(value=0,form=~1))
+summary(p4)
+
+summary(p1)$AIC
+summary(p2)$AIC
+summary(p3)$AIC
+summary(p4)$AIC
+
+akaike.weights(c(summary(p1)$AIC, summary(p2)$AIC, summary(p4)$AIC, summary(p4)$AIC))
+
+AICc(summary(p1)$AIC, 11, 4)
+AICc(summary(p2)$AIC, 11, 6)
+AICc(summary(p3)$AIC, 11, 5)
+AICc(summary(p4)$AIC, 11, 5)
+
+akaike.weights(c(AICc(summary(p1)$AIC, 11, 5), AICc(summary(p2)$AIC, 11, 7), AICc(summary(p3)$AIC, 11, 6), AICc(summary(p4)$AIC, 11, 6)))
+
+
+
+q1 <- lme(GR ~ CD, random = ~ 1|MOTHER)
+summary(q1)
+
+
+r1 <- lme(GR2 ~ MINCRF1, random = ~1 | MOTHER2)
+summary(r1)
+
+
+library(devtools)
+r.squared = source_url("https://raw.githubusercontent.com/jslefche/rsquared.glmm/master/rsquaredglmm.R")
+
+r.squared.lme(q1)
+r.squared.lme(r1)
+
+```
+
